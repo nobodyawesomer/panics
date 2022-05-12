@@ -14,7 +14,7 @@ func Unwrap[T any](value T, err error) T {
 }
 
 // Try returns a Result given a value and an error.
-func Try[T any](value T, err error) *errant[T] {
+func Try[T any](value T, err error) Result[T] {
 	return &errant[T]{
 		Ok:  value,
 		Err: err,
@@ -53,7 +53,7 @@ func (e *errant[R]) UnwrapOrElse(onError func() R) R {
 	return e.Ok
 }
 
-func (e *errant[R]) Catch(errorType error, onCatch func(*R, error)) *errant[R] {
+func (e *errant[R]) Catch(errorType error, onCatch func(*R, error)) Result[R] {
 	if errors.Is(e.Err, errorType) {
 		onCatch(&e.Ok, e.Err)
 		e.Err = nil
@@ -61,7 +61,7 @@ func (e *errant[R]) Catch(errorType error, onCatch func(*R, error)) *errant[R] {
 	return e
 }
 
-func (e *errant[R]) CatchTop(onCatch func(*R, error)) *errant[R] {
+func (e *errant[R]) CatchTop(onCatch func(*R, error)) Result[R] {
 	onCatch(&e.Ok, e.Err)
 	e.Err = errors.Unwrap(e.Err)
 	return e
