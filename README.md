@@ -29,8 +29,8 @@ import (
 
 Then, wrap your function calls, and unwrap the errors:
 ```go
-value := Try(strconv.atoi("bloop"))
-	.UnwrapOr(10) // defaults to 10 on any error :)
+value := Try(strconv.atoi("bloop")).
+	UnwrapOr(10) // defaults to 10 on any error :)
 ```
 
 See documentation for more options.

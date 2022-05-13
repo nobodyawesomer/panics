@@ -13,6 +13,14 @@ func Unwrap[T any](value T, err error) T {
 	return value
 }
 
+// Check is syntactical sugar for dealing with errors.
+// It simply panics on error.
+func Check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Try returns a Result given a value and an error.
 func Try[T any](value T, err error) Result[T] {
 	return &errant[T]{
@@ -53,6 +61,13 @@ func (e *errant[R]) UnwrapOrElse(onError func() R) R {
 	return e.Ok
 }
 
+func (e *errant[R]) UnwrapOrDefault() R {
+	if e.Err != nil {
+		e.Ok = *new(R)
+	}
+	return e.Ok
+}
+
 func (e *errant[R]) Catch(errorType error, onCatch func(*R, error)) Result[R] {
 	if errors.Is(e.Err, errorType) {
 		onCatch(&e.Ok, e.Err)
@@ -61,14 +76,14 @@ func (e *errant[R]) Catch(errorType error, onCatch func(*R, error)) Result[R] {
 	return e
 }
 
-func (e *errant[R]) CatchTop(onCatch func(*R, error)) Result[R] {
-	onCatch(&e.Ok, e.Err)
-	e.Err = errors.Unwrap(e.Err)
-	return e
-}
+// func (e *errant[R]) CatchTop(onCatch func(*R, error)) Result[R] {
+// 	onCatch(&e.Ok, e.Err)
+// 	e.Err = errors.Unwrap(e.Err)
+// 	return e
+// }
 
 func (e *errant[R]) CatchAll(onCatch func(*R, error)) R {
-	if e.Err != nil {
+	if e.Err != nil && onCatch != nil {
 		onCatch(&e.Ok, e.Err)
 	}
 	return e.Ok
