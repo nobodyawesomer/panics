@@ -69,8 +69,16 @@ func (e *errant[R]) UnwrapOrDefault() R {
 }
 
 func (e *errant[R]) Catch(errorType error, onCatch func(*R, error)) Result[R] {
-	if errors.Is(e.Err, errorType) {
+	if e.Err != nil && errors.Is(e.Err, errorType) {
 		onCatch(&e.Ok, e.Err)
+		e.Err = nil
+	}
+	return e
+}
+
+func (e *errant[R]) CatchAnd(errorType error, value R) Result[R] {
+	if e.Err != nil && errors.Is(e.Err, errorType) {
+		e.Ok = value
 		e.Err = nil
 	}
 	return e
